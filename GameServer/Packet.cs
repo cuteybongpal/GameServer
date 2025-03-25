@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -14,7 +15,7 @@ namespace GameServer
     /// 1~4 : 데이터의 크기(int 가 4byte이기 때문이다.)
     /// 나머지 : 데이터가 직접 들어감
     /// </summary>
-    internal class PacketCreator
+    internal static class Packet
     {
         public enum HeaderType
         {
@@ -27,7 +28,7 @@ namespace GameServer
         const short SizeByteOffSet = 4;
 
         //패킷을 만들어서 반환해준다.
-        public byte[] GetPacket(HeaderType type, object[] args)
+        public static byte[] CreatePacket(HeaderType type, object[] args)
         {
             int dataSize = GetLength(type, args);
             byte[] packet = new byte[dataSize + SizeByteOffSet + 1];//데이터와 데이터 크기, 헤더 타입까지 해서 이렇게 함
@@ -49,7 +50,7 @@ namespace GameServer
             return packet;
         }
         //패킷에 들어갈 데이터 길이를 구함
-        int GetLength(HeaderType type, object[] args )
+        static int GetLength(HeaderType type, object[] args )
         {
             int count = 0;
             switch (type)
@@ -80,7 +81,7 @@ namespace GameServer
         /// <param name="type">헤더 타입</param>
         /// <param name="args">매개 변수들(헤더 타입이 Vector3일 경우float 변수가 3개가 들어가고, Vector2일 경우 float 변수가 2개가 들어가는 형식임)</param>
         /// <returns></returns>
-        byte[] DataToByteArray(HeaderType type, object[] args)
+        static byte[] DataToByteArray(HeaderType type, object[] args)
         {
             byte[] data = null;
             switch (type)
@@ -116,6 +117,59 @@ namespace GameServer
                     break;
             }
             return data;
+        }
+
+        public static HeaderType GetHeaderTypeByPacket(byte[] packet)
+        {
+            return (HeaderType)packet[0];
+        }
+        public static T GetData<T>(HeaderType header, byte[] data)
+        {
+            int index = 1;
+            byte[] size = new byte[SizeByteOffSet];
+            Buffer.BlockCopy(data, index, size, 0, SizeByteOffSet);
+            int dataSize = BitConverter.ToInt32(size, 0);
+            index += 4;
+
+            switch (header)
+            {
+                case HeaderType.H_Vector3:
+                    Vector3 vector3 = new Vector3();
+                    byte[] binaryFloatData = new byte[dataSize];
+                    Buffer.BlockCopy(data, index, binaryFloatData, 0, sizeof(float) * 3);
+                    float floatData = BitConverter.ToSingle(binaryFloatData, 0);
+                    vector3.X = floatData;
+                    floatData = BitConverter.ToSingle(binaryFloatData, 0);
+                    vector3.Y = floatData;
+                    floatData = BitConverter.ToSingle(binaryFloatData, sizeof(float));
+                    vector3.Z = floatData;
+                    return (T)(object)vector3;
+                case HeaderType.H_Vector2:
+                    Vector2 vector2 = new Vector2();
+                    byte[] binaryFloat = new byte[dataSize];
+                    Buffer.BlockCopy(data, index, binaryFloat, 0, sizeof(float) * 3);
+                    float floats = BitConverter.ToSingle(binaryFloat, 0);
+                    vector2.X = floats;
+                    floats = BitConverter.ToSingle(binaryFloat, sizeof(float));
+                    vector2.Y = floats;
+                    return (T)(object)vector2;
+                case HeaderType.H_int:
+                    byte[] binary = new byte[dataSize];
+                    Buffer.BlockCopy(data, index, binary, 0, sizeof(int));
+                    int intData = BitConverter.ToInt32(binary, 0);
+                    return (T)(object)intData;
+                case HeaderType.H_float:
+                    byte[] b = new byte[dataSize];
+                    Buffer.BlockCopy(data, index, b, 0, sizeof(float));
+                    float ff = BitConverter.ToSingle(b, 0);
+                    return (T)(object)ff;
+                case HeaderType.H_string:
+                    byte[] st = new byte[dataSize];
+                    //Buffer.BlockCopy
+                    break;
+                default:
+                    return default(T);
+            }
         }
     }
 }
