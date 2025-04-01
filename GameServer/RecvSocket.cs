@@ -12,6 +12,7 @@ namespace GameServer
     {
         Socket recvSocket;
         SocketAsyncEventArgs e = new SocketAsyncEventArgs();
+        PacketProcessor processor = new PacketProcessor();
         public RecvSocket(IPEndPoint endPoint)
         {
             recvSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
@@ -42,6 +43,11 @@ namespace GameServer
             if (e.SocketError == SocketError.Success)
             {
                 byte[] buffer = e.Buffer;
+                Socket _sender = e.ConnectSocket;
+                Task.Run(() =>
+                {
+                    processor.ProcessPacket(buffer, _sender);
+                });
             }
             else
             {

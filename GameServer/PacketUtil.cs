@@ -40,7 +40,7 @@ namespace GameServer
         }
         public static T GetData<T>(Packet packet)
         {
-            int index = 1;
+            int index = 0;
             byte[] size = new byte[SizeByteOffSet];
 
             Buffer.BlockCopy(packet.Data, index, size, 0, SizeByteOffSet);
@@ -227,6 +227,7 @@ namespace GameServer
             {
                 this.PacketHeader = (byte)bytePacket[0];
                 int index = 1;
+
                 Buffer.BlockCopy(bytePacket, index, this.DataSize, 0, sizeof(int));
                 index += sizeof(int);
                 Data = new byte[BitConverter.ToInt32(DataSize,0)];
