@@ -13,10 +13,9 @@ namespace GameServer
         Socket recvSocket;
         SocketAsyncEventArgs e = new SocketAsyncEventArgs();
         PacketProcessor processor = new PacketProcessor();
-        public RecvSocket(IPEndPoint endPoint)
+        public RecvSocket(Socket socket)
         {
-            recvSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
-            recvSocket.Bind(endPoint);
+            recvSocket = socket;
         }
 
         public async Task CheckRecvDatas()
@@ -31,14 +30,13 @@ namespace GameServer
             if (!isPending)
             {
                 OnRecvData(null, e);
+                return;
             }
-            else
-            {
-                e.Completed += OnRecvData;
-            }
+            e.Completed += OnRecvData;
+            
         }
 
-        void OnRecvData(object sender, SocketAsyncEventArgs e)
+        void OnRecvData(object? sender, SocketAsyncEventArgs e)
         {
             if (e.SocketError == SocketError.Success)
             {

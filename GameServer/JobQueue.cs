@@ -6,22 +6,22 @@ using System.Threading.Tasks;
 
 namespace GameServer
 {
-    internal class JobQueue
+    internal class JobQueue<T> where T : Delegate
     {
         readonly object queueLocker = new object();
-        private Queue<Action> job = new Queue<Action>();
+        private Queue<T> job = new Queue<T>();
 
 
-        public void Push(Action action)
+        public void Push(T action)
         {
             lock (queueLocker)
             {
                 job.Enqueue(action);
             }
         }
-        public Action Popup()
+        public T Pop()
         {
-            Action action;
+            T action;
             try
             {
                 action = job.Dequeue();

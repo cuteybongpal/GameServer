@@ -32,7 +32,11 @@ namespace GameServer
         {
             if (args.SocketError == SocketError.Success)
             {
-                GameServer.JobQueue.Push(() => { GameServer.users.Add(args.ConnectSocket); });
+                GameServer.ConnectJobProcessor.Push(() => 
+                {
+                    GameServer.users.Add(args.ConnectSocket);
+                    Console.WriteLine("연결에 성공했습니다!!!");
+                });
                 AcceptAsync();
             }
             else
@@ -40,11 +44,9 @@ namespace GameServer
                 Console.WriteLine("접속 요청을 받을 수 없습니다.");
             }
         }
-        public AcceptSocket(int MaxPerson, IPEndPoint ipEndPoint)
+        public AcceptSocket(Socket socket)
         {
-            acceptSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
-            acceptSocket.Bind(ipEndPoint);
-            acceptSocket.Listen(MaxPerson);
+            acceptSocket = socket;
         }
     }
 }
