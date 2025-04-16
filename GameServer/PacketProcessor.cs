@@ -24,6 +24,11 @@ namespace GameServer
             byte[] AccembledPacket = data.Packet; //조립한 패킷을 가져옴
             //todo : 패킷 처리
             Console.WriteLine("패킷 받음!!!"+AccembledPacket.Length);
+            Packet p = new Packet(AccembledPacket);
+            if ((HeaderType)p.PacketHeader == HeaderType.H_string)
+            {
+                p.GetLength
+            }
         }
     }
     public class RecvData
