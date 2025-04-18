@@ -27,7 +27,18 @@ namespace GameServer
             Packet p = new Packet(AccembledPacket);
             if ((HeaderType)p.PacketHeader == HeaderType.H_string)
             {
-                p.GetLength
+                byte[] binaryData = p.Data;
+                int dataSize = BitConverter.ToInt32(p.DataSize, 0);
+                string stringData = "";
+                for (int i = 0; i < dataSize; i+=2)
+                {
+                    byte[] charData = new byte[2];
+                    Buffer.BlockCopy(binaryData, i, charData, 0, sizeof(char));
+                    char cData;
+                    cData = BitConverter.ToChar(charData);
+                    stringData += cData.ToString();
+                }
+                Console.WriteLine(stringData);
             }
         }
     }
