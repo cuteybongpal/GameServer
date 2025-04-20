@@ -10,10 +10,11 @@ namespace GameServer
         public static RecvSocket recvSocket;
         public static SendSocket sendSocket;
         static Initializer initializer = new Initializer();
-        public static List<Socket> users = new List<Socket>();
+        public static List<Session> Users = new List<Session>();
         //public static JobQueue JobQueue = new JobQueue();
         public static JobQueueProcessor<Func<Task>> SendPacketJobProcessor =  new JobQueueProcessor<Func<Task>>();
         public static JobQueueProcessor<Action> ConnectJobProcessor = new JobQueueProcessor<Action>();
+        public static JobQueueProcessor<Action> PacketProcessor = new JobQueueProcessor<Action>();
         static void Main(string[] args)
         {
             IPHostEntry ipHost = Dns.GetHostEntry(Dns.GetHostName());
@@ -26,18 +27,17 @@ namespace GameServer
 
             initializer.Init();
             acceptSocket = new AcceptSocket(serverSocket);
-            recvSocket = new RecvSocket(serverSocket);
-            sendSocket = new SendSocket(serverSocket);
+            sendSocket = new SendSocket();
 
             Task.Run(() => { acceptSocket.StartAccpet(); });
-            Task.Run(() => { recvSocket.CheckRecvDatas(); });
             Task.Run(() => { ConnectJobProcessor.Process(); });
             Task.Run(() => { SendPacketJobProcessor.Process(); });
+            Task.Run(() => PacketProcessor.Process());
 
             //serverSocket.Bind(endPoint);
             while (true)
             {
-                ;
+                
             }
 
         }

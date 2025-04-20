@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using static GameServer.PacketUtil;
@@ -19,22 +20,25 @@ namespace GameServer
         }
         void AcceptAsync()
         {
-            args = new SocketAsyncEventArgs();
+            args.AcceptSocket = null;
             bool pending = acceptSocket.AcceptAsync(args);
             if (!pending)
             {
                 OnAccept(null, args);
                 return;
             }
-            args.Completed += OnAccept;
+            
         }
         void OnAccept(object? sender, SocketAsyncEventArgs args)
         {
             if (args.SocketError == SocketError.Success)
             {
+                Socket clientSocket = args.AcceptSocket;
                 GameServer.ConnectJobProcessor.Push(() => 
                 {
-                    GameServer.users.Add(args.ConnectSocket);
+                    Console.WriteLine(clientSocket.Connected);
+                    Session userSession = new Session(clientSocket);
+                    GameServer.Users.Add(userSession);
                     Console.WriteLine("연결에 성공했습니다!!!");
                 });
                 AcceptAsync();
@@ -47,6 +51,8 @@ namespace GameServer
         public AcceptSocket(Socket socket)
         {
             acceptSocket = socket;
+            args = new SocketAsyncEventArgs();
+            args.Completed += OnAccept;
         }
     }
 }

@@ -18,88 +18,66 @@ namespace GameServer
                 packets.Add(sender, new RecvData());
 
             RecvData data = packets[sender];
-            data.AccemblePacket(packet); //패킷 조립
-            if (!data.IsPacketCompleted) //패킷이 잘린 부분이 없이 조립이 되어있지 않으면 함수 종료
-                return;
-            byte[] AccembledPacket = data.Packet; //조립한 패킷을 가져옴
-            //todo : 패킷 처리
-            Console.WriteLine("패킷 받음!!!"+AccembledPacket.Length);
-            Packet p = new Packet(AccembledPacket);
-            if ((HeaderType)p.PacketHeader == HeaderType.H_string)
+            data.AddPacket(packet);
+
+            while (data.Packets.Count > 0)
             {
-                byte[] binaryData = p.Data;
-                int dataSize = BitConverter.ToInt32(p.DataSize, 0);
-                string stringData = "";
-                for (int i = 0; i < dataSize; i+=2)
+                Packet _packet = new Packet(data.Packets.Dequeue());
+                int dataSize = BitConverter.ToInt32(_packet.DataSize, 0);
+                if ((HeaderType)_packet.PacketHeader == HeaderType.Chatting)
                 {
-                    byte[] charData = new byte[2];
-                    Buffer.BlockCopy(binaryData, i, charData, 0, sizeof(char));
-                    char cData;
-                    cData = BitConverter.ToChar(charData);
-                    stringData += cData.ToString();
+                    string stringData = "";
+                    for (int i = 0; i < dataSize; i += 2)
+                    {
+                        byte[] charData = new byte[2];
+                        Buffer.BlockCopy(_packet.Data, i, charData, 0, sizeof(char));
+                        stringData += BitConverter.ToChar(charData); 
+                    }
+                    Console.WriteLine(stringData);
                 }
-                Console.WriteLine(stringData);
             }
         }
     }
     public class RecvData
     {
-        byte[] data;
-        int index = 0;
+        public Queue<byte[]> Packets = new Queue<byte[]>();
+        byte[] packet = new byte[0];
+
         /// <summary>
-        /// 패킷이 잘린 부분 없이 조립이 되어있는지 여부
+        /// 패킷을 넣어준다. 패킷이 잘려서 오거나 합쳐져서 왔을 경우 분리 혹은 합쳐준다.
         /// </summary>
-        public bool IsPacketCompleted
+        /// <param name="packet"></param>
+        public void AddPacket(byte[] packet)
         {
-            get 
+            byte[] _packet = new byte[this.packet.Length + packet.Length];
+            int index = 0;
+            Buffer.BlockCopy(this.packet, 0, _packet, index, this.packet.Length);
+            index += this.packet.Length;
+            Buffer.BlockCopy(packet, 0, _packet, index, packet.Length);
+            packet = _packet;
+
+            if (packet.Length < 5)
+                return;
+
+            while (true)
             {
-                if (data == null)
-                    return false;
-                if (data.Length < 5)
-                    return false;
-                byte[] dataSize = new byte[4];
-                Buffer.BlockCopy(data, 1, dataSize, 0, 4);
-                int size = BitConverter.ToInt32(dataSize, 0);
-                return data.Length == 5 + size;
+                if (packet.Length < 5)
+                    return;
+
+                byte[] size = new byte[4];
+                Buffer.BlockCopy(packet, 1, size, 0, 4);
+
+                int dataSize = BitConverter.ToInt32(size, 0);
+                if (packet.Length < dataSize + 5)
+                    return;
+                byte[] p = new byte[dataSize + 5];
+                Buffer.BlockCopy(packet, 0, p, 0, dataSize + 5);
+                Packets.Enqueue(p);
+
+                byte[] temp = new byte[packet.Length - dataSize - 5];
+                Buffer.BlockCopy(packet, dataSize + 5, temp, 0, temp.Length);
+                packet = temp;
             }
-        }
-        /// <summary>
-        /// 조립된 패킷
-        /// 잘린 부분이 있으면 data를 null로 만들어 주지 않음
-        /// 잘린 부분이 없으면 data 바이트 배열을 다시 사용하기 위해 data에 null을 넣어줌
-        /// </summary>
-        public byte[] Packet 
-        {
-            get 
-            {
-                if (!IsPacketCompleted)
-                    return null;
-                byte[] CopiedPacket = new byte[data.Length];
-                Buffer.BlockCopy(data, 0, CopiedPacket, 0, data.Length);
-                data = null;
-                index = 0;
-                return CopiedPacket;
-            }
-        }
-        /// <summary>
-        /// 패킷을 조립하는 함수
-        /// </summary>
-        /// <param name="packet">Recieve로 받아온 패킷</param>
-        public void AccemblePacket(byte[] packet)
-        {
-            //data가 null일 경우 패킷의 길이만큼 배열의 길이를 넣어줌
-            if (data == null)
-                data = new byte[packet.Length];
-            //data가 null이 아닐 경우 즉, 패킷이 잘려서 온 경우
-            else
-            {
-                byte[] temp = new byte[data.Length];
-                Buffer.BlockCopy(data, 0, temp, 0, data.Length);
-                data = new byte[packet.Length + temp.Length];
-                Buffer.BlockCopy(temp, 0, data, 0, temp.Length);
-            }
-            Buffer.BlockCopy(packet, 0, data, index, packet.Length);
-            index += packet.Length;
         }
     }
 }

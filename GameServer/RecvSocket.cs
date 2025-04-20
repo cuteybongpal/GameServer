@@ -16,6 +16,9 @@ namespace GameServer
         public RecvSocket(Socket socket)
         {
             recvSocket = socket;
+            e = new SocketAsyncEventArgs();
+            e.SetBuffer(new byte[1024],0, 1024);
+            e.Completed += OnRecvData;
         }
 
         public async Task CheckRecvDatas()
@@ -25,24 +28,28 @@ namespace GameServer
 
         void RecvAsync()
         {
-            e = new SocketAsyncEventArgs();
             bool isPending = recvSocket.ReceiveAsync(e);
+
             if (!isPending)
             {
+                Console.WriteLine("pending is true");
                 OnRecvData(null, e);
                 return;
             }
-            e.Completed += OnRecvData;
-            
         }
 
         void OnRecvData(object? sender, SocketAsyncEventArgs e)
         {
+            Console.WriteLine(e.SocketError);
+            Console.WriteLine(e.BytesTransferred);
             if (e.SocketError == SocketError.Success)
             {
-                byte[] buffer = e.Buffer;
-                Socket _sender = e.ConnectSocket;
-                Task.Run(() =>
+                if (e.BytesTransferred == 0)
+                    return;
+                byte[] buffer = new byte[e.BytesTransferred];
+                Buffer.BlockCopy(e.Buffer, 0, buffer, 0, e.BytesTransferred);
+                Socket _sender = recvSocket;
+                GameServer.PacketProcessor.Push(() =>
                 {
                     processor.ProcessPacket(buffer, _sender);
                 });
@@ -50,7 +57,10 @@ namespace GameServer
             else
             {
                 Console.WriteLine("소켓 에러 : 소켓에서 받지 못했음ㅋ");
+                recvSocket.Close();
+                return;
             }
+            RecvAsync();
         }
     }
 }

@@ -66,7 +66,7 @@ namespace GameServer
 
                         return (T)(object)vector3;
                     }
-                case HeaderType.H_Vector2:
+                case HeaderType.BallMove:
                     {
                         data = new byte[sizeof(float)];
                         Vector2 vector2 = new Vector2();
@@ -96,7 +96,7 @@ namespace GameServer
                         float floatData = BitConverter.ToSingle(data, 0);
                         return (T)(object)floatData;
                     }
-                case HeaderType.H_string:
+                case HeaderType.Chatting:
                     {
                         data = new byte[sizeof(char)];
                         string stringData = "";
@@ -125,9 +125,9 @@ namespace GameServer
     {
         H_int,
         H_Vector3,
-        H_Vector2,
+        BallMove,
         H_float,
-        H_string,
+        Chatting,
     }
 
     public struct Packet
@@ -150,7 +150,7 @@ namespace GameServer
                 case HeaderType.H_int:
                     count += sizeof(int);
                     break;
-                case HeaderType.H_Vector2:
+                case HeaderType.BallMove:
                     count += sizeof(float) * 2;
                     break;
                 case HeaderType.H_Vector3:
@@ -159,7 +159,7 @@ namespace GameServer
                 case HeaderType.H_float:
                     count += sizeof(float);
                     break;
-                case HeaderType.H_string:
+                case HeaderType.Chatting:
                     string d = args[0] as string;
                     foreach (char c in d)
                         count += sizeof(char);
@@ -184,11 +184,11 @@ namespace GameServer
                 case HeaderType.H_float:
                     data = BitConverter.GetBytes((float)args[0]);
                     break;
-                case HeaderType.H_string:
+                case HeaderType.Chatting:
                     string s = (string)args[0];
                     data = Encoding.Unicode.GetBytes(s);
                     break;
-                case HeaderType.H_Vector2:
+                case HeaderType.BallMove:
                     data = new byte[sizeof(float) * 2];
                     for (int i = 0; i < 2; i++)
                     {
