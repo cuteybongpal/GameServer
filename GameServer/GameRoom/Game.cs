@@ -51,6 +51,10 @@ namespace GameServer.GameRoom
             int[] roomIds = gameRooms.Keys.ToArray();
             return roomIds;
         }
+        public void EnterGameRoom(int RoomId)
+        {
+
+        }
     }
 
 }

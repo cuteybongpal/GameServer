@@ -13,7 +13,7 @@ namespace GameServer.GameRoom
     internal class Entity
     {
         public Vector2 Position = Vector2.Zero;
-        public string name = "NewGameObject";
+        public string Name = "NewGameObject";
         public List<Component> Components = new List<Component>();
         public PingPong GameRoom;
 

@@ -15,9 +15,19 @@ namespace GameServer.GameRoom
         public Action UpdateAction;
         public Action StartAction;
         int deltaTime;
+        public int[] Scores = new int[2];
+
+        ColliderSystem colliderSystem;
+        RigidBodySystem rigidBodySystem;
+
+        public static float CameraOffsetX = 9.8f;
+        public static float CameraOffsetY = 5.4f;
 
         public async Task Start()
         {
+            colliderSystem = new ColliderSystem(UpdateAction);
+            rigidBodySystem = new RigidBodySystem(UpdateAction);
+
             deltaTime = (int)Math.Round(Game.DeltaTime * 1000);
             StartAction?.Invoke();
             await Task.Delay(deltaTime);
@@ -36,6 +46,8 @@ namespace GameServer.GameRoom
         {
             RoomID = NextRoomID;
             NextRoomID++;
+
+            Start();
         }
     }
 }
