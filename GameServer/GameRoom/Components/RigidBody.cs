@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameServer.Game.Components
+namespace GameServer.GameRoom.Components
 {
     internal class RigidBody : Component
     {

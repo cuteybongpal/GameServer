@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using GameServer.GameRoom;
+using System.Net;
 using System.Net.Sockets;
 
 namespace GameServer
@@ -15,6 +16,8 @@ namespace GameServer
         public static JobQueueProcessor<Func<Task>> SendPacketJobProcessor =  new JobQueueProcessor<Func<Task>>();
         public static JobQueueProcessor<Action> ConnectJobProcessor = new JobQueueProcessor<Action>();
         public static JobQueueProcessor<Action> PacketProcessor = new JobQueueProcessor<Action>();
+        public static Game Game = new Game();
+
         static void Main(string[] args)
         {
             IPHostEntry ipHost = Dns.GetHostEntry(Dns.GetHostName());

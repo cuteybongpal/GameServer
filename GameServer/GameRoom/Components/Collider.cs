@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameServer.Game.Components
+namespace GameServer.GameRoom.Components
 {
     /// <summary>
     /// 사각형 충돌 판정을 해주는 컴포넌트

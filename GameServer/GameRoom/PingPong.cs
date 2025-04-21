@@ -1,11 +1,11 @@
-﻿using GameServer.Game.System;
+﻿using GameServer.GameRoom.System;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameServer.Game
+namespace GameServer.GameRoom
 {
     internal class PingPong
     {
@@ -16,20 +16,20 @@ namespace GameServer.Game
         public Action StartAction;
         int deltaTime;
 
-        public void Start()
+        public async Task Start()
         {
             deltaTime = (int)Math.Round(Game.DeltaTime * 1000);
             StartAction?.Invoke();
-            Task.Delay(deltaTime);
+            await Task.Delay(deltaTime);
             Update();
         }
-        public void Update()
+        public async Task Update()
         {
             int deltaTime = (int)Math.Round(Game.DeltaTime * 1000);
             while (true)
             {
                 UpdateAction?.Invoke();
-                Task.Delay(deltaTime);
+                await Task.Delay(deltaTime);
             }
         }
         public PingPong()

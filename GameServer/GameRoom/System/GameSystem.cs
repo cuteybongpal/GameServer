@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameServer.Game.System
+namespace GameServer.GameRoom.System
 {
     internal abstract class GameSystem
     {

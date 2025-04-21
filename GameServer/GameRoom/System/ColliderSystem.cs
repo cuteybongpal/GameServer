@@ -1,4 +1,4 @@
-﻿using GameServer.Game.Components;
+﻿using GameServer.GameRoom.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameServer.Game.System
+namespace GameServer.GameRoom.System
 {
     internal class ColliderSystem : GameSystem
     {

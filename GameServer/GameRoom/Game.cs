@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameServer.Game
+namespace GameServer.GameRoom
 {
     internal class Game
     {
@@ -38,6 +38,18 @@ namespace GameServer.Game
                 }
             }
             UserInScenes[scenes].Add(session);
+        }
+
+        public void MakeRoom()
+        {
+            PingPong pingPong = new PingPong();
+            gameRooms.Add(pingPong.RoomID, pingPong);
+        }
+
+        public int[] GetRoomIds()
+        {
+            int[] roomIds = gameRooms.Keys.ToArray();
+            return roomIds;
         }
     }
 

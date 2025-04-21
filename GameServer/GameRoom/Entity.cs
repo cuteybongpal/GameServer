@@ -5,10 +5,10 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using GameServer.Game;
-using GameServer.Game.Components;
+using GameServer.GameRoom;
+using GameServer.GameRoom.Components;
 
-namespace GameServer.Game
+namespace GameServer.GameRoom
 {
     internal class Entity
     {
